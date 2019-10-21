@@ -86,5 +86,5 @@ echo "[#] > " $NMAPSCAN;
 echo "[+] ================================================================================";
 eval $NMAPSCAN;
 
-xsltproc "$NAME"/nmap_FullScan_"$NAME".xml -o nmap_"$NAME"_fullReport.html
+xsltproc nmap-bootstrap.xsl/nmap-bootstrap.xsl "$NAME"/nmap_FullScan_"$NAME".xml -o nmap_"$NAME"_fullReport.html
 echo "\n[·] D O N E \n"
