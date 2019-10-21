@@ -1,0 +1,3 @@
+[submodule "nmap-bootstrap.xsl"]
+	path = nmap-bootstrap.xsl
+	url = https://github.com/honze-net/nmap-bootstrap-xsl.git
