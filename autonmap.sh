@@ -1,10 +1,11 @@
 #!/bin/bash
 usage () {
-  echo -e "\nautonmap is a bash script designed to run automatically a full host discovery, scaning and firgerprinting of a range of systems during a pentest\nIt'a main goal is to provide a full host discovery scant that provides all the information needed for later phases of the pentest";
+  echo -e "autonmap is designed to run a full host discovery, scaning and firgerprinting of wide ranges of systems during a pentest"
+  echo -e "It's main goal is to provide a complete portscan that provides all the information needed for further phases of a pentest\n\nUsage:";
   echo -e "./autonmap -n <name> -t <target>";
-  echo -e "-n \tName to use to save the scan related files, this script will create a directory to save these files";
-  echo -e "-t \tTarget IP CIDR or \"-iL file.lst\" to scan";
-  echo -e "\n\tMade with love and tacos by cthulhu897 @diax.mx\n";
+  echo -e "\t-n \tName to use to save the scan related files, this script will create a directory to save these files";
+  echo -e "\t-t \tTarget IP,CIDR or pass an input file as \"-iL file.lst\" to scan more complex ranges";
+  echo -e "\nNote: This script was written while drunk so a lot of command injection vulns are present by design so dont trust it for public use. Made with love and tacos by @cthulhu897\n";
 }
 
 while getopts ":t:n:" opt; do
@@ -17,7 +18,7 @@ while getopts ":t:n:" opt; do
     n)
       echo -e "[+] Name spacified:\t $OPTARG" >&2
       NAME="$OPTARG"
-      DIRECTORY=output_autonmap_"$NAME"
+      DIRECTORY=autonmap_"$NAME"
       f_name=true
       ;;
     \?)
@@ -37,17 +38,16 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 if [ -z "$f_name" ] || [ -z "$f_target" ]; then
     usage;
-    echo -e "\n[!] ERROR!"
-    echo -e "[!]\tOPTs [-n] NAME and [-t] TARGET must be included to launch an automatic scan!\n\n" >&2
+    echo -e "[!] ERROR!"
+    echo -e "[!]\tCommand line arguments [-n] NAME and [-t] TARGET must be included to launch an automatic scan!\n" >&2
     exit 1;
 fi
 
 if [ -d "$DIRECTORY" ]; then
-  echo -e "\n[!] WARNING!"
-  echo -e "[!]\t[ $(pwd)/$DIRECTORY/ ] already exists in this system."
-  echo -e "[!]\tThis script will overwrite existing files in the directory!\n";
+  echo -e "[!] WARNING!"
+  echo -e "[!] [ $(pwd)/$DIRECTORY/ ] already exists in this system."
+  echo -e "[!] This script will overwrite existing files in the directory!\n";
   read -p "Continue? [Y/n] > " -n 1 -r
-  echo    # (optional) move to a new line
   if [[ ! $REPLY =~ ^[Yy]$ ]]
   then
     echo -e "\n[!]\t ERROR!"
@@ -57,7 +57,7 @@ if [ -d "$DIRECTORY" ]; then
 fi
 
 #init the varibles and mkdir
-echo "[+] Creating directories for output as $(pwd)/$DIRECTORY/"
+echo "[+] Creating directory for writting the output [$(pwd)/$DIRECTORY/]"
 mkdir "$DIRECTORY"
 
 #Host discovery on top ports
@@ -86,9 +86,9 @@ UDPPORTS=$(cat "$DIRECTORY"/autonmap_SYNScan_"$NAME".gnmap | awk -F " " '{ s = "
 
 #Final scan full connect and service reconnaissance if<>fi sentece to handle empty strings and keep command integrity
 if [ -z "${TCPPORTS}" ]; then
-    NMAPSCAN="nmap -sT -sV -O -A -p T:22,80,443,U:137,161,"$UDPPORTS" $TARGET -oA "$DIRECTORY"/autonmap_FULLScan_"$NAME"";
+    NMAPSCAN="nmap -sT -sV -O -A -p T:22,80,443,U:137,161,"$UDPPORTS" $TARGET -oA "$DIRECTORY"/autonmap_ServiceScan_"$NAME"";
 else
-    NMAPSCAN="nmap -sT -sV -O -A -p T:22,80,443,"$TCPPORTS",U:137,161,"$UDPPORTS" $TARGET -oA "$DIRECTORY"/autonmap_FULLScan_"$NAME"";
+    NMAPSCAN="nmap -sT -sV -O -A -p T:22,80,443,"$TCPPORTS",U:137,161,"$UDPPORTS" $TARGET -oA "$DIRECTORY"/autonmap_ServiceScan_"$NAME"";
 fi
 echo "[+] ================================================================================";
 echo "[+] =============================   F U L L    S C A N   ===========================";
@@ -97,5 +97,6 @@ echo "[#] > " $NMAPSCAN;
 echo "[+] ================================================================================";
 eval $NMAPSCAN;
 
-xsltproc -o ./"$DIRECTORY"/autonmap_"$NAME"_fullReport.html "$DIR"/nmap-bootstrap.xsl/nmap-bootstrap.xsl ./"$DIRECTORY"/autonmap_FULLScan_"$NAME".xml
-echo "\n[·] D O N E \n"
+xsltproc -o ./"$DIRECTORY"/autonmap_"$NAME"_Report.html "$DIR"/nmap-bootstrap.xsl/nmap-bootstrap.xsl ./"$DIRECTORY"/autonmap_ServiceScan_"$NAME".xml
+
+echo "[*] D O N E \n"
