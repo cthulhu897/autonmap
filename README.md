@@ -7,14 +7,14 @@ git clone --recursive https://github.com/cthulhu897/autonmap.git
 
 Run as:
 ```
-sudo /opt/autonmap/autonmap.sh -n <name> -t <target>
+sudo /opt/autonmap/autonmap.sh -o <output_name> -t <target>
 ```
 
 Examples:
 ```
-sudo /opt/autonmap/autonmap.sh -n localhost -t 127.0.0.1
+sudo /opt/autonmap/autonmap.sh -o localhost -t 127.0.0.1
 ```
 
 ```
-sudo /opt/autonmap/autonmap.sh -n myhome -t "-iL myhomestaticipaddreses.txt"
+sudo /opt/autonmap/autonmap.sh -o myhome -t "-iL myhomestaticipaddreses.txt"
 ```
