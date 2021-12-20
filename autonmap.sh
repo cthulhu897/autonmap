@@ -85,9 +85,9 @@ UDPPORTS=$(cat "${NAME}_autonmap_openports.gnmap" | awk -F " " '{ s = ""; for (i
 
 #Final scan full connect and service reconnaissance if<>fi sentece to handle empty strings and keep command integrity
 if [ -z "${TCPPORTS}" ]; then
-    NMAPSCAN="nmap -sS -sV -sC -O -A -sU -p T:22,80,443,U:137,161,${UDPPORTS} -oA ${NAME}_autonmap_openports $TARGET ";
+    NMAPSCAN="nmap -Pn -sS -sV -sC -O -A -sU -p T:22,80,443,U:137,161,${UDPPORTS} -oA ${NAME}_autonmap_openports $TARGET ";
 else
-    NMAPSCAN="nmap -sS -sV -sC -O -A -sU -p T:22,80,443,${TCPPORTS},U:137,161,${UDPPORTS} -oA ${NAME}_autonmap_servicescan $TARGET ";
+    NMAPSCAN="nmap -Pn -sS -sV -sC -O -A -sU -p T:22,80,443,${TCPPORTS},U:137,161,${UDPPORTS} -oA ${NAME}_autonmap_servicescan $TARGET ";
 fi
 echo "[+] ================================================================================";
 echo "[+] =============================   F U L L    S C A N   ===========================";
