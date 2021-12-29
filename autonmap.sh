@@ -96,6 +96,6 @@ echo "[#] > " $NMAPSCAN;
 echo "[+] ================================================================================";
 eval $NMAPSCAN;
 
-xsltproc -o "${NAME}_autonmap_report.html ${DIR}/nmap-bootstrap.xsl/nmap-bootstrap.xsl ${NAME}_autonmap_servicescan.xml
+xsltproc -o "${NAME}_autonmap_report.html" "${DIR}/nmap-bootstrap.xsl/nmap-bootstrap.xsl" "${NAME}_autonmap_servicescan.xml"
 
 echo "[*] D O N E \n"
