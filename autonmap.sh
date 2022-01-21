@@ -1,30 +1,56 @@
 #!/bin/bash
 usage () {
-  echo -e "autonmap is designed to run a full host discovery, scaning and firgerprinting of wide ranges of systems during a pentest"
-  echo -e "It's main goal is to provide a complete portscan that provides all the information needed for further phases of a pentest\n\nUsage:";
-  echo -e "./autonmap -o <output_files> -t <target>";
-  echo -e "\t-o \tFile name to use to save scan related files";
+  echo -e "\n[i] autonmap is designed to run a full host discovery,"
+  echo -e "[i] scaning and firgerprinting of wide ranges of systems during a pentest"
+  echo -e "[i] It's main goal is to provide a complete portscan that provides all "
+  echo -e "[i] the information needed for further phases of a pentest\n\nUsage:"
+  echo -e "sudo ./autonmap -o <output_files> -t <target> -h\n"
+
+  echo -e "\t-h \tDisplays this message of use"
+  echo -e "\t-o \tFile name to use to save scan related files"
   echo -e "\t-t \tTarget IP,CIDR or pass an input file as \"-iL file.lst\" to scan more complex ranges";
-  echo -e "\nNote: This script was written while drunk so a lot of command injection vulns are present by design so dont trust it for public use. Made with love and tacos by @cthulhu897\n";
+  echo -e "\n[!] Note: This script was written while drunk so a lot of command injection vulns are present by design so dont trust it for public use."
+  echo -e "[*]Made with love and tacos by @cthulhu897 With FataKe additives XD.\n"
 }
 
-while getopts ":t:o:" opt; do
+# Check if root launch
+if [ "$EUID" -ne 0 ]
+  then echo -e "[!] Please run as root\n[i] check sudo ./autonmap -h"
+  exit 1
+fi
+
+# Check opts
+while getopts ":t:o:h" opt; do
   case $opt in
+    # help
+    h)
+      echo "[+] ================================================================================";
+      echo "[+] ====================================   USAGE   =================================";
+      echo "[+] ================================================================================";
+      usage
+      exit 1
+      ;;
+
+    # Target
     t)
       echo -e "[+] Target:\t\t $OPTARG" >&2
       TARGET="$OPTARG"
       f_target=true
       ;;
+
+    # output file
     o)
       echo -e "[+] Output Files:\t $OPTARG" >&2
       NAME="$OPTARG"
       f_name=true
       ;;
+
     \?)
       echo -e "[!] Invalid option:\t -$OPTARG" >&2
       usage
       exit 1
       ;;
+
     :)
       echo -e "[!] Option -$OPTARG requires an argument." >&2
       usage
@@ -33,14 +59,14 @@ while getopts ":t:o:" opt; do
   esac
 done
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+# check tan output and target is not empty
 if [ -z "$f_name" ] || [ -z "$f_target" ]; then
-    usage;
-    echo -e "[!] ERROR!"
-    echo -e "[!]\tCommand line arguments [-n] NAME and [-t] TARGET must be included to launch an automatic scan!\n" >&2
-    exit 1;
+  echo -e "[!] ERROR! \n[i] check ./autonmap -h"
+  exit 1;
 fi
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # if [ -d "$DIRECTORY" ]; then
 #   echo -e "[!] WARNING!"
@@ -59,7 +85,7 @@ fi
 #echo "[+] Creating directory for writting the output [$(pwd)/$DIRECTORY/]"
 #mkdir -p "$DIRECTORY"
 
-#Host discovery on top ports
+#Host discovery on top TCP and UDP ports
 ALIVEHOSTS="nmap -sn -PE -PP -PM -PS80,443,22,3389,1723,8080,3306,135,53,143,139,445,110,25,21,23,5432,27017,1521 -PU139,53,67,135,445,1434,138,123,137,161,631 $TARGET -oA ${NAME}_autonmap_alive";
 echo "[+] ================================================================================";
 echo "[+] ==========================  H O S T    D I S C O V E R Y  ======================";
