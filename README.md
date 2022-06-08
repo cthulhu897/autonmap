@@ -6,7 +6,7 @@ Script to run a trustfull nmap scan against a target or a list of targets
 
 Clone github repository
 ```
-git clone --recursive https://github.com/cthulhu897/autonmap.git
+git clone --recursive https://github.com/Fatake/autonmap.git
 ```
 
 Run as root:
