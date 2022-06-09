@@ -9,17 +9,18 @@ Clone github repository
 git clone --recursive https://github.com/Fatake/autonmap.git
 ```
 
-Run as Help:
+**Help**:
 
 ```
 sudo ./autonmap.sh -h
 ```
 
-Run as root:
+**Run script**
+One target:
 ```
 sudo ./autonmap.sh -o <output_name> -t <target>
 ```
-or
+List of Targets:
 ```
 sudo ./autonmap.sh -o <output_name> -t "-iL tartgets.lts"
 ```
