@@ -10,14 +10,8 @@ usage () {
   echo -e "\t-o \tFile name to use to save scan related files"
   echo -e "\t-t \tTarget IP,CIDR or pass an input file as \"-iL file.lst\" to scan more complex ranges";
   echo -e "\n[!] Note: This script was written while drunk so a lot of command injection vulns are present by design so dont trust it for public use."
-  echo -e "[*] Made with love and tacos by \n-> @cthulhu897 \n->Fatake \n"
+  echo -e "[*] Made with love and tacos by \n-> @cthulhu897 \n-> @Fatake \n"
 }
-
-# Check if root launch
-if [ "$EUID" -ne 0 ]
-  then echo -e "[!] Please run as root\n[i] check sudo ./autonmap -h"
-  exit 1
-fi
 
 # Check opts
 while getopts ":t:o:h" opt; do
@@ -59,6 +53,11 @@ while getopts ":t:o:h" opt; do
   esac
 done
 
+# Check if root launch
+if [ "$EUID" -ne 0 ]
+  then echo -e "[!] Please run as root\n[i] check sudo ./autonmap -h"
+  exit 1
+fi
 # check tan output and target is not empty
 if [ -z "$f_name" ] || [ -z "$f_target" ]; then
   echo -e "[!] ERROR! \n[i] check ./autonmap -h"
