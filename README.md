@@ -16,6 +16,7 @@ sudo ./autonmap.sh -h
 ```
 
 **Run script**
+
 One target:
 ```
 sudo ./autonmap.sh -o <output_name> -t <target>
