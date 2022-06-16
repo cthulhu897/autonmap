@@ -54,19 +54,19 @@ while getopts ":t:o:h" opt; do
 done
 
 # Check if root launch
-if [ "$EUID" -ne 0 ]
-  then echo -e "[!] Please run as root\n[i] check sudo ./autonmap -h"
+if [ "$EUID" -ne 0 ] then 
+  echo -e "[!] Please run as root\n[i] check sudo ./autonmap -h"
   exit 1
 fi
-# check tan output and target is not empty
+
+# check that output and target is not empty
 if [ -z "$f_name" ] || [ -z "$f_target" ]; then
   echo -e "[!] ERROR! \n[i] check ./autonmap -h"
   exit 1;
 fi
 
 SAVE_DIR="autonmap_${NAME}"
-if [ ! -d "${SAVE_DIR}" ] 
-then
+if [ ! -d "${SAVE_DIR}" ] then
   echo "================================================================================";
   echo -e "[*] Creating directory: ${SAVE_DIR}...\n"
   /bin/bash -c "mkdir ${SAVE_DIR}/" 2>/dev/null
@@ -74,23 +74,41 @@ then
 fi
 
 #Host discovery on top TCP and UDP ports
-ALIVEHOSTS="nmap -sn -PE -PP -PM -PS80,443,22,3389,1723,8080,3306,135,53,143,139,445,110,25,21,23,5432,27017,1521 -PU139,53,67,135,445,1434,138,123,137,161,631 $TARGET -oA ${SAVE_DIR}/${NAME}_aliveHosts";
+TCPPORTS="80,443,22,3389,1723,8080,3306,135,53,143,139,445,110,25,21,23,5432,27017,1521"
+UDPPORTS="139,53,67,135,445,1434,138,123,137,161,631"
+
+SCAN_TYPE="-sn -PE -PP -PM -PS${TCPPORTS} -PU${UDPPORTS}"
+
+OUT_FILE="-oA ${SAVE_DIR}/${NAME}_alive_hosts"
+
+ALIVEHOSTS="sudo nmap ${SCAN_TYPE} ${OUT_FILE} ${TARGET} ";
 echo "================================================================================";
 echo "==========================  H O S T    D I S C O V E R Y  ======================";
 echo "================================================================================";
-echo "pentester# "$ALIVEHOSTS;
+echo "pentester# ${ALIVEHOSTS}";
 echo -e "================================================================================\n";
 eval $ALIVEHOSTS
 #Extract list of alive hosts
 cat "${SAVE_DIR}/${NAME}_aliveHosts.gnmap" | grep "Status: Up" | cut -d " " -f 2 > "${SAVE_DIR}/${NAME}_hosts".lst;
 
 #Fast full port scan with 65535 tcp ports and top UDP
-COMMUN_UDP_PORTS="7,9,11,13,17,19,37,49,53,67-69,80,88,111,120,123,135-139,158,161-162,177,213,259-260,427,443,445,464,497,500,514-515,518,520,523,593,623,626,631,749-751,996-999,1022-1023,1025-1030,1194,1433-1434,1645-1646,1701,1718-1719,1812-1813,1900,2000,2048-2049,2222-2223,2746,3230-3235,3283,3401,3456,3703,4045,4444,4500,4665-4666,4672,5000,5059-5061,5351,5353,5632,6429,7777,8888,9100-9102,9200,10000,17185,18233,20031,23945,26000-26004,26198,27015-27030,27444,27960-27964,30718,30720-30724,31337,32768-32769,32771,32815,33281,34555,44400,47545,49152-49154,49156,49181-49182,49186,49190-49194,49200-49201,49211,54321,65024"
-SYNSCAN="nmap -Pn -sS -sU -p T:1-65535,U:${COMMUN_UDP_PORTS} -T4 --max-retries 2 --min-rtt-timeout 500ms --max-rtt-timeout 2000ms --initial-rtt-timeout 750ms --defeat-rst-ratelimit --min-rate 900 --max-rate 8000 --disable-arp-ping -oA ${SAVE_DIR}/${NAME}_openports -iL ${SAVE_DIR}/${NAME}_hosts.lst -v ";
+TCPPORTS="1-65535"
+UDPPORTS="7,9,11,13,17,19,37,49,53,67-69,80,88,111,120,123,135-139,158,161-162,177,213,259-260,427,443,445,464,497,500,514-515,518,520,523,593,623,626,631,749-751,996-999,1022-1023,1025-1030,1194,1433-1434,1645-1646,1701,1718-1719,1812-1813,1900,2000,2048-2049,2222-2223,2746,3230-3235,3283,3401,3456,3703,4045,4444,4500,4665-4666,4672,5000,5059-5061,5351,5353,5632,6429,7777,8888,9100-9102,9200,10000,17185,18233,20031,23945,26000-26004,26198,27015-27030,27444,27960-27964,30718,30720-30724,31337,32768-32769,32771,32815,33281,34555,44400,47545,49152-49154,49156,49181-49182,49186,49190-49194,49200-49201,49211,54321,65024"
+
+RRT="--min-rtt-timeout 500ms --max-rtt-timeout 2000ms --initial-rtt-timeout 750ms"
+RATE="--min-rate 900 --max-rate 8000 "
+TIMING="--max-retries 2 -T3 ${RRT} --defeat-rst-ratelimit ${RATE} --disable-arp-ping"
+
+SCAN_TYPE="-Pn -sS -sU"
+
+INPUT_FILE="-iL ${SAVE_DIR}/${NAME}_hosts.lst"
+OUT_FILE="-oA ${SAVE_DIR}/${NAME}_syn_scan"
+
+SYNSCAN="nmap ${SCAN_TYPE} -p T:${TCPPORTS},U:${UDPPORTS} ${TIMING} ${OUT_FILE} ${INPUT_FILE}";
 echo -e "\n\n================================================================================";
 echo "================================  S Y N   S C A N  =============================";
 echo "================================================================================";
-echo "pentester# "$SYNSCAN;
+echo "pentester# ${SYNSCAN}";
 echo -e "================================================================================\n";
 eval $SYNSCAN;
 
@@ -98,19 +116,21 @@ eval $SYNSCAN;
 TCPPORTS=$(cat "${SAVE_DIR}/${NAME}_openports.gnmap" | awk -F " " '{ s = ""; for (i = 4; i <= NF; i++) s = s $i " "; print s }' | tr ", " "\n" | grep open | grep tcp | cut -d "/" -f 1 | sort -nu | paste -s -d, - );
 UDPPORTS=$(cat "${SAVE_DIR}/${NAME}_openports.gnmap" | awk -F " " '{ s = ""; for (i = 4; i <= NF; i++) s = s $i " "; print s }' | tr ", " "\n" | grep open | grep udp | cut -d "/" -f 1 | sort -nu | paste -s -d, - );
 
+SCAN_TYPE="-Pn -sS -sV -sC -sU -O -A"
+OUT_FILE="-oA ${SAVE_DIR}/${NAME}_service_scan"
 #Final scan full connect and service reconnaissance if<>fi sentece to handle empty strings and keep command integrity
 if [ -z "${TCPPORTS}" ]; then
-  NMAPSCAN="nmap -Pn -sS -sV -sC -O -A -sU -p T:22,80,443,U:${UDPPORTS} -oA ${SAVE_DIR}/${NAME}_details $TARGET ";
-else
-  NMAPSCAN="nmap -Pn -sS -sV -sC -O -A -sU -p T:${TCPPORTS},U:${UDPPORTS} -oA ${SAVE_DIR}/${NAME}_details $TARGET ";
+  TCPPORTS="22,80,443"
 fi
+
+NMAPSCAN="nmap ${SCAN_TYPE} -p T:${TCPPORTS},U:${UDPPORTS} ${OUT_FILE} ${INPUT_FILE}";
 echo -e "\n\n================================================================================";
 echo "=============================   F U L L    S C A N   ===========================";
 echo "================================================================================";
-echo "pentester# " $NMAPSCAN;
+echo "pentester# ${NMAPSCAN}";
 echo -e "================================================================================\n";
 eval $NMAPSCAN;
 
-xsltproc -o "${NAME}_autonmap_report.html" "${DIR}/nmap-bootstrap.xsl/nmap-bootstrap.xsl" "${NAME}_autonmap_servicescan.xml"
+#xsltproc -o "${SAVE_DIR}/${NAME}_report.html" "/opt/autonmap/nmap-bootstrap.xsl/nmap-bootstrap.xsl" "${SAVE_DIR}/${NAME}_service_scan.xml"
 
 echo "[*] D O N E \n"
