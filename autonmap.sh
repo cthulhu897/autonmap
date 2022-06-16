@@ -54,7 +54,7 @@ while getopts ":t:o:h" opt; do
 done
 
 # Check if root launch
-if [ "$EUID" -ne 0 ] then 
+if [ "$EUID" -ne 0 ]; then 
   echo -e "[!] Please run as root\n[i] check sudo ./autonmap -h"
   exit 1
 fi
@@ -66,7 +66,7 @@ if [ -z "$f_name" ] || [ -z "$f_target" ]; then
 fi
 
 SAVE_DIR="autonmap_${NAME}"
-if [ ! -d "${SAVE_DIR}" ] then
+if [ ! -d "${SAVE_DIR}" ]; then
   echo "================================================================================";
   echo -e "[*] Creating directory: ${SAVE_DIR}...\n"
   /bin/bash -c "mkdir ${SAVE_DIR}/" 2>/dev/null
@@ -89,7 +89,7 @@ echo "pentester# ${ALIVEHOSTS}";
 echo -e "================================================================================\n";
 eval $ALIVEHOSTS
 #Extract list of alive hosts
-cat "${SAVE_DIR}/${NAME}_aliveHosts.gnmap" | grep "Status: Up" | cut -d " " -f 2 > "${SAVE_DIR}/${NAME}_hosts".lst;
+cat "${SAVE_DIR}/${NAME}_alive_hosts.gnmap" | grep "Status: Up" | cut -d " " -f 2 > "${SAVE_DIR}/${NAME}_hosts".lst;
 
 #Fast full port scan with 65535 tcp ports and top UDP
 TCPPORTS="1-65535"
@@ -97,7 +97,7 @@ UDPPORTS="7,9,11,13,17,19,37,49,53,67-69,80,88,111,120,123,135-139,158,161-162,1
 
 RRT="--min-rtt-timeout 500ms --max-rtt-timeout 2000ms --initial-rtt-timeout 750ms"
 RATE="--min-rate 900 --max-rate 8000 "
-TIMING="--max-retries 2 -T3 ${RRT} --defeat-rst-ratelimit ${RATE} --disable-arp-ping"
+TIMING="--max-retries 2 -T4 ${RRT} --defeat-rst-ratelimit ${RATE} --disable-arp-ping"
 
 SCAN_TYPE="-Pn -sS -sU"
 
@@ -113,8 +113,8 @@ echo -e "=======================================================================
 eval $SYNSCAN;
 
 #Extract open ports list trimming ending comma
-TCPPORTS=$(cat "${SAVE_DIR}/${NAME}_openports.gnmap" | awk -F " " '{ s = ""; for (i = 4; i <= NF; i++) s = s $i " "; print s }' | tr ", " "\n" | grep open | grep tcp | cut -d "/" -f 1 | sort -nu | paste -s -d, - );
-UDPPORTS=$(cat "${SAVE_DIR}/${NAME}_openports.gnmap" | awk -F " " '{ s = ""; for (i = 4; i <= NF; i++) s = s $i " "; print s }' | tr ", " "\n" | grep open | grep udp | cut -d "/" -f 1 | sort -nu | paste -s -d, - );
+TCPPORTS=$(cat "${SAVE_DIR}/${NAME}_syn_scan.gnmap" | awk -F " " '{ s = ""; for (i = 4; i <= NF; i++) s = s $i " "; print s }' | tr ", " "\n" | grep open | grep tcp | cut -d "/" -f 1 | sort -nu | paste -s -d, - );
+UDPPORTS=$(cat "${SAVE_DIR}/${NAME}_syn_scan.gnmap" | awk -F " " '{ s = ""; for (i = 4; i <= NF; i++) s = s $i " "; print s }' | tr ", " "\n" | grep open | grep udp | cut -d "/" -f 1 | sort -nu | paste -s -d, - );
 
 SCAN_TYPE="-Pn -sS -sV -sC -sU -O -A"
 OUT_FILE="-oA ${SAVE_DIR}/${NAME}_service_scan"
@@ -131,6 +131,14 @@ echo "pentester# ${NMAPSCAN}";
 echo -e "================================================================================\n";
 eval $NMAPSCAN;
 
-#xsltproc -o "${SAVE_DIR}/${NAME}_report.html" "/opt/autonmap/nmap-bootstrap.xsl/nmap-bootstrap.xsl" "${SAVE_DIR}/${NAME}_service_scan.xml"
 
+NMAP_BOOTSTRAP_PATH="/opt/autonmap/nmap-bootstrap.xsl/nmap-bootstrap.xsl"
+
+REPORT="xsltproc -o ${SAVE_DIR}/${NAME}_report.html ${NMAP_BOOTSTRAP_PATH} ${SAVE_DIR}/${NAME}_service_scan.xml"
+echo -e "\n\n================================================================================";
+echo        "=================================   REPORTING   ================================";
+echo        "================================================================================";
+echo "pentester# ${REPORT}";
+echo -e "================================================================================\n";
+eval $REPORT
 echo "[*] D O N E \n"
