@@ -1,10 +1,15 @@
 # AutoNmap
+
 Script to run a trustfull nmap scan against a target or a list of targets
 
-------------
+![](assets/20220616_095155.png)
+
+---
+
 ## Usage
 
 Clone github repository
+
 ```
 git clone --recursive https://github.com/Fatake/autonmap.git
 ```
@@ -18,16 +23,21 @@ sudo ./autonmap.sh -h
 **Run script**
 
 One target:
+
 ```
 sudo ./autonmap.sh -o <output_name> -t <target>
 ```
+
 List of Targets:
+
 ```
 sudo ./autonmap.sh -o <output_name> -t "-iL tartgets.lts"
 ```
 
-------------
+---
+
 ## Examples:
+
 ```
 sudo ./autonmap.sh -o localhost -t 127.0.0.1
 ```
