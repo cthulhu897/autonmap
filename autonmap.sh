@@ -132,7 +132,7 @@ echo -e "=======================================================================
 eval $NMAPSCAN;
 
 
-NMAP_BOOTSTRAP_PATH="nmap-bootstrap.xsl/nmap-bootstrap.xsl"
+NMAP_BOOTSTRAP_PATH="$(pwd)/nmap-bootstrap.xsl/nmap-bootstrap.xsl"
 
 REPORT="xsltproc -o ${SAVE_DIR}/${NAME}_report.html ${NMAP_BOOTSTRAP_PATH} ${SAVE_DIR}/${NAME}_service_scan.xml"
 echo -e "\n\n================================================================================";
