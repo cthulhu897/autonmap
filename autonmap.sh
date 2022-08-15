@@ -1,16 +1,12 @@
 #!/bin/bash
 usage () {
-  echo -e "\n[i] autonmap is designed to run a full host discovery,"
-  echo -e "[i] scaning and firgerprinting of wide ranges of systems during a pentest"
-  echo -e "[i] It's main goal is to provide a complete portscan that provides all "
-  echo -e "[i] the information needed for further phases of a pentest\n\nUsage:"
-  echo -e "sudo ./autonmap -o <output_files> -t <target> -h\n"
-
+  echo -e "\n[i] autonmap is designed to run a full TCP/IP host discovery, scaning and firgerprinting"
+  echo -e "[i] Usage:"
+  echo -e "sudo ./autonmap -o <output_files> -t <target>\n\n"
   echo -e "\t-h \tDisplays this message of use"
   echo -e "\t-o \tFile name to use to save scan related files"
-  echo -e "\t-t \tTarget IP,CIDR or pass an input file as \"-iL file.lst\" to scan more complex ranges";
-  echo -e "\n[!] Note: This script was written while drunk so a lot of command injection vulns are present by design so dont trust it for public use."
-  echo -e "[*]Made with love and tacos by @cthulhu897 With FataKe additives XD.\n"
+  echo -e "\t-t \tTarget IP,CIDR or pass an input file as \"-iL file.lst\" to scan more complex ranges\n\n";
+  echo -e "[i] This script is only a wrapper for bash evals, so, use parameters with care!"
 }
 
 # Check if root launch
