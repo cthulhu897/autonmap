@@ -27,14 +27,12 @@ while getopts ":t:o:h" opt; do
 
     # Target
     t)
-      echo -e "[+] Target:\t\t $OPTARG" >&2
       TARGET="$OPTARG"
       f_target=true
       ;;
 
     # output file
     o)
-      echo -e "[+] Output Files:\t $OPTARG" >&2
       NAME="$OPTARG"
       f_name=true
       ;;
@@ -64,6 +62,18 @@ if [ -z "$f_name" ] || [ -z "$f_target" ]; then
   echo -e "[!] ERROR! \n[i] check ./autonmap -h"
   exit 1;
 fi
+
+FLAG="-iL"
+if [[ "$TARGET" == *"-iL"* ]]; then
+  FILE_NAME=${TARGET//$FLAG/}
+  TRGS=$(echo $(cat $FILE_NAME) | tr ' ' ',')
+  echo -e "[+] File:\t\t${FILE_NAME}" >&2
+  echo -e "[i] Targets:\t\t ${TRGS}" >&2
+else
+  echo -e "[+] Target:\t\t $TARGET" >&2
+fi
+
+echo -e "[+] Output Files:\t $NAME" >&2
 
 SAVE_DIR="autonmap_${NAME}"
 if [ ! -d "${SAVE_DIR}" ]; then
@@ -99,7 +109,7 @@ RRT="--min-rtt-timeout 500ms --max-rtt-timeout 2000ms --initial-rtt-timeout 750m
 RATE="--min-rate 900 --max-rate 8000 "
 TIMING="--max-retries 2 -T4 ${RRT} --defeat-rst-ratelimit ${RATE} --disable-arp-ping"
 
-SCAN_TYPE="-Pn -sS -sU"
+SCAN_TYPE="-Pn -n -sS -sU"
 
 INPUT_FILE="-iL ${SAVE_DIR}/${NAME}_hosts.lst"
 OUT_FILE="-oA ${SAVE_DIR}/${NAME}_syn_scan"
@@ -131,8 +141,7 @@ echo "pentester# ${NMAPSCAN}";
 echo -e "================================================================================\n";
 eval $NMAPSCAN;
 
-
-NMAP_BOOTSTRAP_PATH="$(pwd)/nmap-bootstrap.xsl/nmap-bootstrap.xsl"
+NMAP_BOOTSTRAP_PATH="/opt/autonmap/nmap-bootstrap.xsl/nmap-bootstrap.xsl"
 
 REPORT="xsltproc -o ${SAVE_DIR}/${NAME}_report.html ${NMAP_BOOTSTRAP_PATH} ${SAVE_DIR}/${NAME}_service_scan.xml"
 echo -e "\n\n================================================================================";
