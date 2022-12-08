@@ -8,10 +8,14 @@ import subprocess
 try:
     import pandas as pd                  
 except ImportError:
-    print("[!] pandas is not installed")
-    print("pip install pandas")
-    exit(1)
-
+    try:
+        import pip
+        pip.main(['install', '--user', 'pandas'])
+        import pandas as pd 
+    except:
+        print("[!] pandas is not installed")
+        print("pip install pandas")
+        exit(1)
 
 def main(fileName):
     if not os.path.exists(fileName):
@@ -23,7 +27,7 @@ def main(fileName):
     unicIPs = dataFrame.drop_duplicates(subset=["ip"], keep="first")
 
     for ip in unicIPs['ip']:
-        mask = dataFrame['ip'] == ip.replace("\n", "")
+        mask = dataFrame['ip'] == ip
         
         df_new = pd.DataFrame(dataFrame[mask])
 
