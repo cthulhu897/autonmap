@@ -115,10 +115,10 @@ if [ ! -s "${OUTPUT}_ports.nmap" ]; then
   DETAIL_SCAN_PORTS="T:22,80,443"
   DETAIL_SCAN_CMD="nmap -Pn -sT -sV -sC -O -p $DETAIL_SCAN_PORTS -oA ${OUTPUT}_final $TARGET -T2 --max-retries 3 --min-rtt-timeout 250ms --max-rtt-timeout 2000ms --initial-rtt-timeout 750ms --min-rate 125 --max-rate 2000 --min-hostgroup 256 --max-hostgroup 1024 --defeat-rst-ratelimit"
 else
-  OPEN_TCP_PORTS=$(awk '/open/&&/tcp/ {print $1}' "${OUTPUT}_ports.nmap" | cut -d '/' -f 1 | sort -n | uniq | paste -sd, -)
-  OPEN_UDP_PORTS=$(awk '/open/&&/udp/ {print $1}' "${OUTPUT}_ports.nmap" | cut -d '/' -f 1 | sort -n | uniq | paste -sd, -)
+  OPEN_TCP_PORTS=$(awk '/open/&&/tcp/{print $1}' "${OUTPUT}_ports.nmap" | cut -d '/' -f 1 | sort -u | uniq | paste -sd,)
+  OPEN_UDP_PORTS=$(awk '/open/&&/udp/{print $1}' "${OUTPUT}_ports.nmap" | cut -d '/' -f 1 | sort -u | uniq | paste -sd,)
   DETAIL_SCAN_PORTS="T:22,80,443,$OPEN_TCP_PORTS,U:137,161,$OPEN_UDP_PORTS"
-  DETAIL_SCAN_CMD="nmap -Pn -sS -sU -sV -sC -O -p $DETAIL_SCAN_PORTS -oA ${OUTPUT}_final $TARGET"
+  DETAIL_SCAN_CMD="nmap -Pn -sS -sU --open -sV -sC -O -p $DETAIL_SCAN_PORTS -oA ${OUTPUT}_final $TARGET"
 fi
 
 if ! eval "$DETAIL_SCAN_CMD"; then
@@ -128,7 +128,7 @@ fi
 
 # Generate report
 log_info "Generating HTML report..."
-XSLT_TRANSFORM_CMD="xsltproc -o ${OUTPUT}_report.html ${SCRIPT_DIR}/nmap-bootstrap.xsl ${OUTPUT}_final.xml"
+XSLT_TRANSFORM_CMD="xsltproc -o ${OUTPUT}_report.html ${SCRIPT_DIR}/nmap-bootstrap.xsl/nmap-bootstrap.xsl ${OUTPUT}_final.xml"
 if ! eval "$XSLT_TRANSFORM_CMD"; then
   log_error "Failed to generate HTML report."
   exit 1
