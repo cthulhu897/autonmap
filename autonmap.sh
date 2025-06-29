@@ -105,10 +105,10 @@ SYN_SCAN_TCP_PORTS="1-65535"
 SYN_SCAN_UDP_PORTS="7,9,11,13,17,19,37,49,53,67-69,80,88,111,120,123,135-139,158,161-162,177,213,259-260,427,443,445,464,497,500,514-515,518,520,523,593,623,626,631,749-751,996-999,1022-1023,1025-1030,1194,1433-1434,1645-1646,1701,1718-1719,1812-1813,1900,2000,2048-2049,2222-2223,2746,3230-3235,3283,3401,3456,3703,4045,4444,4500,4665-4666,4672,5000,5059-5061,5351,5353,5632,6429,7777,8888,9100-9102,9200,10000,17185,18233,20031,23945,26000-26004,26198,27015-27030,27444,27960-27964,30718,30720-30724,31337,32768-32769,32771,32815,33281,34555,44400,47545,49152-49154,49156,49181-49182,49186,49190-49194,49200-49201,49211,54321,65024"
 NMAP_SYN_SCAN_CMD="nmap -vvv -Pn -sS -sU --open -p T:${SYN_SCAN_TCP_PORTS},U:${SYN_SCAN_UDP_PORTS} -oA ${OUTPUT}_ports -iL ${OUTPUT}_alive.lst -T4 --max-retries 2 --min-rtt-timeout 250ms --max-rtt-timeout 1000ms --initial-rtt-timeout 750ms --min-rate 250 --max-rate 2000 --min-hostgroup 256 --max-hostgroup 512 --defeat-rst-ratelimit"
 echo $NMAP_SYN_SCAN_CMD
-if ! eval "$NMAP_SYN_SCAN_CMD"; then
-  log_error "SYN scan failed."
-  exit 1
-fi
+# if ! eval "$NMAP_SYN_SCAN_CMD"; then
+#   log_error "SYN scan failed."
+#   exit 1
+# fi
 
 # Detailed scan
 log_info "Running detailed scan..."
@@ -125,15 +125,16 @@ fi
 # maybe be more polite ?
 DETAIL_SCAN_CMD="nmap -vv -Pn -sT -sU --open -sV --version-intensity 2 --script-timeout 120s -sC -O -p $DETAIL_SCAN_PORTS -oA ${OUTPUT}_final -iL ${OUTPUT}_alive.lst -T4 --max-retries 3 --min-rtt-timeout 250ms --max-rtt-timeout 2000ms --initial-rtt-timeout 750ms --min-rate 125 --max-rate 2000 --min-hostgroup 8 --max-hostgroup 256 --max-parallelism 2048  --min-parallelism 8 --defeat-rst-ratelimit"
 echo $DETAIL_SCAN_CMD
-if ! eval "$DETAIL_SCAN_CMD"; then
-  log_error "Detailed scan failed."
-  exit 1
-fi
+# if ! eval "$DETAIL_SCAN_CMD"; then
+#   log_error "Detailed scan failed."
+#   exit 1
+# fi
 
 # Generate report
 log_info "Generating HTML report..."
 XSLT_TRANSFORM_CMD="xsltproc -o ${OUTPUT}_report.html ${SCRIPT_DIR}/nmap-bootstrap.xsl/nmap-bootstrap.xsl ${OUTPUT}_final.xml"
 echo $XSLT_TRANSFORM_CMD
+xdg-open ${OUTPUT}_final.xml
 if ! eval "${XSLT_TRANSFORM_CMD}"; then
   log_error "Failed to generate HTML report."
   exit 1
