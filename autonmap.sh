@@ -115,8 +115,8 @@ if [ ! -s "${OUTPUT}_ports.gnmap" ]; then
   DETAIL_SCAN_PORTS="T:22,80,443"
   DETAIL_SCAN_CMD="nmap -Pn -sT -sV -sC -O -p $DETAIL_SCAN_PORTS -oA ${OUTPUT}_final $TARGET -T2 --max-retries 3 --min-rtt-timeout 250ms --max-rtt-timeout 2000ms --initial-rtt-timeout 750ms --min-rate 125 --max-rate 2000 --min-hostgroup 256 --max-hostgroup 1024 --defeat-rst-ratelimit"
 else
-  OPEN_TCP_PORTS=$(awk '/open/&&/tcp/{print int($1)}' "${OUTPUT}_ports.gnmap" | sort -u | paste -sd,)
-  OPEN_UDP_PORTS=$(awk '/open/&&/udp/{print int($1)}' "${OUTPUT}_ports.gnmap" | sort -u | paste -sd,)
+  OPEN_TCP_PORTS=$(awk '/open/&&/tcp/{print int($1)}' "${OUTPUT}_ports.nmap" | sort -u | paste -sd,)
+  OPEN_UDP_PORTS=$(awk '/open/&&/udp/{print int($1)}' "${OUTPUT}_ports.nmap" | sort -u | paste -sd,)
   DETAIL_SCAN_PORTS="T:22,80,443,$OPEN_TCP_PORTS,U:137,161,$OPEN_UDP_PORTS"
   DETAIL_SCAN_CMD="nmap -Pn -sS -sV -sC -O -p $DETAIL_SCAN_PORTS -oA ${OUTPUT}_final $TARGET"
 fi
