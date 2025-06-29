@@ -128,7 +128,7 @@ fi
 
 # Generate report
 log_info "Generating HTML report..."
-XSLT_TRANSFORM_CMD="xsltproc -o ${OUTPUT}_report.html ${SCRIPT_DIR}/nmap-bootstrap.xsl ${OUTPUT}_final.xml"
+XSLT_TRANSFORM_CMD="xsltproc -o ${OUTPUT}_report.html ${SCRIPT_DIR}/nmap-bootstrap.xsl/nmap-bootstrap.xsl ${OUTPUT}_final.xml"
 if ! eval "$XSLT_TRANSFORM_CMD"; then
   log_error "Failed to generate HTML report."
   exit 1
