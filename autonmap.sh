@@ -98,7 +98,7 @@ if ! grep "Status: Up" "${OUTPUT}_hosts.gnmap" | cut -d " " -f 2 > "${OUTPUT}_al
   exit 1
 fi
 
-# SYN scan
+# # SYN scan
 log_info "Running SYN scan..."
 SYN_SCAN_TCP_PORTS="1-65535"
 SYN_SCAN_UDP_PORTS="7,9,11,13,17,19,37,49,53,67-69,80,88,111,120,123,135-139,158,161-162,177,213,259-260,427,443,445,464,497,500,514-515,518,520,523,593,623,626,631,749-751,996-999,1022-1023,1025-1030,1194,1433-1434,1645-1646,1701,1718-1719,1812-1813,1900,2000,2048-2049,2222-2223,2746,3230-3235,3283,3401,3456,3703,4045,4444,4500,4665-4666,4672,5000,5059-5061,5351,5353,5632,6429,7777,8888,9100-9102,9200,10000,17185,18233,20031,23945,26000-26004,26198,27015-27030,27444,27960-27964,30718,30720-30724,31337,32768-32769,32771,32815,33281,34555,44400,47545,49152-49154,49156,49181-49182,49186,49190-49194,49200-49201,49211,54321,65024"
@@ -110,15 +110,15 @@ fi
 
 # Detailed scan
 log_info "Running detailed scan..."
-if [ ! -s "${OUTPUT}_ports.gnmap" ]; then
+if [ ! -s "${OUTPUT}_ports.nmap" ]; then
   log_warning "No open ports found from SYN scan. Scanning default ports..."
   DETAIL_SCAN_PORTS="T:22,80,443"
   DETAIL_SCAN_CMD="nmap -Pn -sT -sV -sC -O -p $DETAIL_SCAN_PORTS -oA ${OUTPUT}_final $TARGET -T2 --max-retries 3 --min-rtt-timeout 250ms --max-rtt-timeout 2000ms --initial-rtt-timeout 750ms --min-rate 125 --max-rate 2000 --min-hostgroup 256 --max-hostgroup 1024 --defeat-rst-ratelimit"
 else
-  OPEN_TCP_PORTS=$(awk '/open/&&/tcp/{print int($1)}' "${OUTPUT}_ports.gnmap" | sort -u | paste -sd,)
-  OPEN_UDP_PORTS=$(awk '/open/&&/udp/{print int($1)}' "${OUTPUT}_ports.gnmap" | sort -u | paste -sd,)
+  OPEN_TCP_PORTS=$(awk '/open/&&/tcp/ {print $1}' "${OUTPUT}_ports.nmap" | cut -d '/' -f 1 | sort -n | uniq | paste -sd, -)
+  OPEN_UDP_PORTS=$(awk '/open/&&/udp/ {print $1}' "${OUTPUT}_ports.nmap" | cut -d '/' -f 1 | sort -n | uniq | paste -sd, -)
   DETAIL_SCAN_PORTS="T:22,80,443,$OPEN_TCP_PORTS,U:137,161,$OPEN_UDP_PORTS"
-  DETAIL_SCAN_CMD="nmap -Pn -sS -sV -sC -O -p $DETAIL_SCAN_PORTS -oA ${OUTPUT}_final $TARGET"
+  DETAIL_SCAN_CMD="nmap -Pn -sS -sU -sV -sC -O -p $DETAIL_SCAN_PORTS -oA ${OUTPUT}_final $TARGET"
 fi
 
 if ! eval "$DETAIL_SCAN_CMD"; then
